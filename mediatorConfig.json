@@ -44,6 +44,12 @@
       "array": false,
       "template": [
         {
+          "param": "readFromMongo",
+          "displayName": "Reprocess from Mongo",
+          "description": "Reprocess data from successful transactions within MongoDB",
+          "type": "bool"
+        },
+        {
           "param": "reprocessFromDate",
           "displayName": "Reprocess From Date",
           "description": "The start of the reprocessing period. Defaults to 1970-01-01. Accepted Formats: YYYY-MM-DD, YYYY-MM-DDThh:mm:ss, or YYYY-MM-DDThh:mm:ss.s",
