@@ -6,14 +6,16 @@
   "license": "MIT",
   "scripts": {
     "start": "node app.mjs",
+    "start:mongo":"nodemon ./routes/mongo.mjs",
     "docker:build": "docker build -t jembi/reprocess-mediator .",
     "docker:push": "docker push jembi/reprocess-mediator"
   },
   "dependencies": {
     "axios": "^0.21.1",
     "express": "^4.17.1",
-    "moment": "^2.29.1",
     "kafka-node": "^5.0.0",
+    "moment": "^2.29.1",
+    "mongoose": "^7.4.3",
     "openhim-mediator-utils": "^0.2.3",
     "pino": "^6.13.1",
     "pino-pretty": "^6.0.0"
