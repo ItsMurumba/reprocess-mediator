@@ -21,9 +21,9 @@ producer.on('ready', function () {
   logger.info('Successfully connected to Kafka')
 })
 
-export const sendDataToKafka = (data, errCallback, successCallback) => {
+export const sendDataToKafka = (data, errCallback, successCallback, topic=KAFKA_REPROCESSING_TOPIC) => {
   const payload = [{
-    topic: KAFKA_REPROCESSING_TOPIC,
+    topic,
     partition: KAFKA_PARTITION,
     messages: JSON.stringify(data)
   }]
