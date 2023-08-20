@@ -1,6 +1,8 @@
 'use strict'
 
 import { stringToInt } from "../routes/utils.mjs"
+import { config } from 'dotenv';
+config();
 
 export const SERVER_PORT = process.env.SERVER_PORT || 3000
 
