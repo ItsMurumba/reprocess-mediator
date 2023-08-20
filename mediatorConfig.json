@@ -50,6 +50,12 @@
           "type": "bool"
         },
         {
+          "param": "transactionRequestMethod",
+          "displayName": "Transaction Request Method",
+          "description": "The HTTP request method made of the data send to the /fhir endpoint (value can either be ALL, POST or DELETE, default is ALL)",
+          "type":"string"
+        },
+        {
           "param": "reprocessFromDate",
           "displayName": "Reprocess From Date",
           "description": "The start of the reprocessing period. Defaults to 1970-01-01. Accepted Formats: YYYY-MM-DD, YYYY-MM-DDThh:mm:ss, or YYYY-MM-DDThh:mm:ss.s",

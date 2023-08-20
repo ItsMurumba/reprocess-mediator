@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 import logger from '../logger.mjs';
 import { sendDataToKafka } from './kafka.mjs';
+import { KAFKA_2XX_TOPIC } from '../config/config.mjs';
 
 logger.info('Now connecting to MongoDB');
 await mongoose.connect('mongodb://localhost:27017/openhim-development',{
@@ -8,53 +9,36 @@ await mongoose.connect('mongodb://localhost:27017/openhim-development',{
 }).then(() => logger.info('Connection Successful'))
 .catch(err => logger.error(`Failed to Connect: ${err.message}`));
 
-export async function findFHIRTransactions({reprocessFromDate, reprocessToDate, transactionRequestMethod='ALL'}){
+export async function reprocessFHIRTransactions({reprocessFromDate, reprocessToDate, transactionRequestMethod='ALL'}){
     const method = transactionRequestMethod.toLocaleUpperCase();
 
-    const openhimFHIRTransactions = await mongoose.connection.db.collection('transactions').find({
+    const query = mongoose.connection.db.collection('transactions').find({
         status: 'Successful',
         'request.path': '/fhir',
-        ...(['POST', 'DELETE'].includes(method) ? { method }: null),
+        ...(['POST', 'DELETE'].includes(method) ? { 'request.method': method.toUpperCase() }: null),
         'request.timestamp': {
             $gte: new Date(reprocessFromDate),
             $lte: new Date(reprocessToDate),
         }
-    }).toArray();
+    }).sort({ 'request.method': -1, 'request.timestamp': 1})
+    
+    // count() method on Mongodb's FindCursor class is deprecated and will require querying the database again so I figure this is faster.
+    let count = 0;
 
-    logger.info(`${openhimFHIRTransactions.length}: transactions found`);
-
-    return openhimFHIRTransactions.reduce((acc, cur)=>{
-        const requestMethod = cur.request.method;
-        const postArrayTuple = acc[0];
-        const deleteArrayTuple = acc[1];
-
-        if(requestMethod === 'POST'){
-            postArrayTuple.push(cur.request.body);
+    for await (const openHimTransaction of query){
+        try {
+           await new Promise((resolve, reject) => {
+                sendDataToKafka(
+                    openHimTransaction.request.body,
+                    reject,
+                    resolve,
+                    KAFKA_2XX_TOPIC)});
+            count++;
+        } catch (error) {
+            logger.error(`Failed to push to Kafka. Error Message: ${error.message}`);
+            throw Error(error.message)
         }
-        if (requestMethod === 'DELETE') {
-            deleteArrayTuple.push(cur.request.body)
-        }
-
-        return [postArrayTuple, deleteArrayTuple];
-    },[[],[]]);
-}
-
-export async function pushTransactionsToKafka(fhirTransactions = [[],[]]){
-    const postTransactions = fhirTransactions[0];
-    const deleteTransactions = fhirTransactions[1];
-
-    if(postTransactions.length === 0 && deleteTransactions.length === 0){
-        throw new Error('No Transactions to Reprocess')
     }
 
-    const sendToKafkaPromise =  new Promise((resolve, reject) => {
-        sendDataToKafka(
-            postTransactions[0],
-            reject,
-            resolve,
-            '2xx'
-        )
-    })
-    .then((data) => logger.info(`Data pushed to kafka`))
-    .catch((err) => logger.error(`Failed to push to Kafka ${err.message}`))
+    return count;
 }
