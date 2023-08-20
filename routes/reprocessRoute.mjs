@@ -2,6 +2,7 @@
 
 import axios from 'axios'
 import moment from 'moment'
+import { reprocessFHIRTransactions } from './mongo.mjs';
 
 import {
   FHIR_RAW_CAREPLAN,
@@ -35,7 +36,27 @@ const elasticSearchConfig = {
 }
 
 export default function reprocess(req, res) {
-  let validatedParameters
+  const transactionId = req.headers['x-openhim-transactionid']
+  let validatedParameters = {
+    reprocessFromDate: req.body.reprocess_fhir_resources.reprocessFromDate,
+    reprocessToDate: req.body.reprocess_fhir_resources.reprocessToDate,
+  }
+
+  if(req.body.reprocess_fhir_resources.readFromMongo === true){
+    reprocessFromOpenHIM(req.body.reprocess_fhir_resources, transactionId, validatedParameters);
+
+    const returnObject = buildReturnObject(
+      'Processing',
+      200,
+      //TODO: create a more relevant message for the MongoDB preprocessor reading
+      { message: "In Progress", from: validatedParameters.reprocessFromDate, to: validatedParameters.reprocessToDate }
+    );
+
+    res.set('Content-Type', 'application/json+openhim')
+    return res.send(returnObject)
+  }
+
+  
 
   try {
     validatedParameters = validateReprocessParameters(
@@ -51,8 +72,7 @@ export default function reprocess(req, res) {
     res.status(400)
     return res.send(returnObject)
   }
-
-  const transactionId = req.headers['x-openhim-transactionid']
+  
 
   reprocessIndexes(validatedParameters)
     .then(() => {
@@ -88,6 +108,34 @@ export default function reprocess(req, res) {
   )
   res.set('Content-Type', 'application/json+openhim')
   return res.send(returnObject)
+}
+
+function reprocessFromOpenHIM(reprocess_fhir_resources, transactionId, validatedParameters) {
+  reprocessFHIRTransactions(reprocess_fhir_resources)
+    .then((numberOfRecords) => {
+      updateOpenhimTransaction(
+        transactionId,
+        'Successful',
+        200,
+        { message: "Successfully Reprocessed from OpenHIM Transactions", numberOfRecords, transactionRequestMethod:reprocess_fhir_resources.transactionRequestMethod, from: validatedParameters.reprocessFromDate, to: validatedParameters.reprocessToDate }
+      );
+      logger.info(
+        `Successfully Reprocessed from OpenHIM Transaction | From: ${validatedParameters.reprocessFromDate} | To: ${validatedParameters.reprocessToDate}`
+      );
+    })
+    .catch(
+      (error) => {
+        updateOpenhimTransaction(
+          transactionId,
+          'Failed',
+          503,
+          { message: "Failed reprocessing", error: error.message, from: validatedParameters.reprocessFromDate, to: validatedParameters.reprocessToDate }
+        );
+        logger.info(
+          `Failed to reprocess from OpenHIM Transactions | From: ${validatedParameters.reprocessFromDate} | To: ${validatedParameters.reprocessToDate}. Error - ${error.message}`
+        );
+      }
+    );
 }
 
 function validateReprocessParameters(inputParams) {
