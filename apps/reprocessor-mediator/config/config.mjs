@@ -8,16 +8,16 @@ export const LOG_LEVEL = process.env.LOG_LEVEL || 'info'
 
 // OpenHIM
 export const OPENHIM_MEDIATOR_URL =
-  process.env.OPENHIM_MEDIATOR_URL || 'https://localhost:8080'
+  process.env.OPENHIM_MEDIATOR_URL || 'https://127.0.0.1:8080'
 export const OPENHIM_TRANSACTION_URL =
-  process.env.OPENHIM_TRANSACTION_URL || 'http://localhost:5000'
+  process.env.OPENHIM_TRANSACTION_URL || 'http://127.0.0.1:5000'
 export const OPENHIM_USERNAME =
   process.env.OPENHIM_USERNAME || 'root@openhim.org'
-export const OPENHIM_PASSWORD = process.env.OPENHIM_PASSWORD || 'instant101'
+export const OPENHIM_PASSWORD = process.env.OPENHIM_PASSWORD || 'wPu8V38ibZy*0&m0'
 export const OPENHIM_CLIENT_CUSTOM_TOKEN =
   process.env.OPENHIM_CLIENT_CUSTOM_TOKEN || 'test'
 
-export const TRUST_SELF_SIGNED = process.env.TRUST_SELF_SIGNED === 'true'
+export const TRUST_SELF_SIGNED = process.env.TRUST_SELF_SIGNED || true
 
 // Elastic Search
 
