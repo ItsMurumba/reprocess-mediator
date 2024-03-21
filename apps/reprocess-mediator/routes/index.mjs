@@ -6,10 +6,14 @@ import {buildReturnObject} from './utils.mjs'
 
 import logger from '../logger.mjs'
 import reprocessRoute from './reprocessRoute.mjs'
+import { getHandler, postHandler } from "./mongodb-route.mjs";
 
 const routes = express.Router()
 
+routes.get('/reprocess/mongo', getHandler);
+routes.post('/reprocess/mongo', postHandler);
 routes.post('/reprocess', reprocessRoute)
+
 
 // Any request regardless of request type or url path to the mediator port will be caught here
 // and trigger the canned response. It may be useful in diagnosing incorrectly configured

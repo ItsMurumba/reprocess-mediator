@@ -1,6 +1,6 @@
 {
   "urn": "urn:mediator:reprocess-mediator",
-  "version": "v1.0.0",
+  "version": "1.4.1",
   "name": "Reprocess Mediator",
   "description": "Reprocess Mediator",
   "defaultChannelConfig": [
@@ -16,12 +16,8 @@
           "type": "http"
         }
       ],
-      "allow": [
-        "instant"
-      ],
-      "methods": [
-        "POST"
-      ],
+      "allow": ["instant"],
+      "methods": ["POST"],
       "type": "http"
     }
   ],
@@ -43,6 +39,26 @@
       "type": "struct",
       "array": false,
       "template": [
+        {
+          "param": "readFromMongo",
+          "displayName": "Reprocess from Mongo",
+          "description": "Reprocess data from successful transactions within MongoDB",
+          "type": "bool"
+        },
+        {
+          "param": "transactionRequestMethod",
+          "displayName": "Transaction Request Method",
+          "description": "The HTTP request method made of the data send to the /fhir endpoint (value can either be ALL, POST or DELETE, default is ALL)",
+          "type": "option",
+          "values": ["POST", "DELETE", "ALL"]
+        },
+        {
+          "param": "sortedOrderOfTransaction",
+          "displayName": "Sorted Order of Transactions",
+          "description": "Defines the how the transaction documents should be sorted, either by the order in which the request came in (timestamp), or by the HTTP Method (POST then DELETE) first then by their timestamp. The Default is Timestamp",
+          "type": "option",
+          "values": ["Timestamped", "Segregated Request and Timestamped"]
+        },
         {
           "param": "reprocessFromDate",
           "displayName": "Reprocess From Date",
@@ -68,6 +84,12 @@
           "type": "bool"
         },
         {
+          "param": "medicationStatement",
+          "displayName": "Reprocess MedicationStatement Resources",
+          "description": "Reprocess the Elastic Search Raw MedicationStatement Index",
+          "type": "bool"
+        },
+        {
           "param": "carePlan",
           "displayName": "Reprocess CarePlan Resources",
           "description": "Reprocess the Elastic Search Raw CarePlan Index",
@@ -80,9 +102,33 @@
           "type": "bool"
         },
         {
-          "param": "episodeOfCare",
+          "param": "espisodeOfCare",
           "displayName": "Reprocess EpisodeOfCare Resources",
           "description": "Reprocess the Elastic Search Raw EpisodeOfCare Index",
+          "type": "bool"
+        },
+        {
+          "param": "serviceRequest",
+          "displayName": "Reprocess ServiceRequest Resources",
+          "description": "Reprocess the Elastic Search Raw ServiceRequest Index",
+          "type": "bool"
+        },
+        {
+          "param": "medicationDispense",
+          "displayName": "Reprocess MedicationDispense Resources",
+          "description": "Reprocess the Elastic Search Raw MedicationDispense Index",
+          "type": "bool"
+        },
+        {
+          "param": "questionnaireResponse",
+          "displayName": "Reprocess QuestionnaireResponse Resources",
+          "description": "Reprocess the Elastic Search Raw QuestionnaireResponse Index",
+          "type": "bool"
+        },
+        {
+          "param": "procedure",
+          "displayName": "Reprocess Procedure Resources",
+          "description": "Reprocess the Elastic Search Raw Procedure Index",
           "type": "bool"
         },
         {
@@ -95,6 +141,12 @@
           "param": "relatedPerson",
           "displayName": "Reprocess Related Person Resources",
           "description": "Reprocess the Elastic Search Raw Related Person Index",
+          "type": "bool"
+        },
+        {
+          "param": "diagnosticReport",
+          "displayName": "Reprocess Diagnostic Report Resources",
+          "description": "Reprocess the Elastic Search Raw Diagnostic Report Index",
           "type": "bool"
         },
         {

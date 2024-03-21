@@ -1,30 +1,43 @@
 'use strict'
 
-import axios from 'axios'
 import moment from 'moment'
+import { Client } from 'es7'
 
 import {
   FHIR_RAW_CAREPLAN,
-  FHIR_RAW_CONDITION,
   FHIR_RAW_ENCOUNTER,
-  FHIR_RAW_EPISODEOFCARE,
+  FHIR_RAW_MEDICATIONDISPENSE,
+  FHIR_RAW_MEDICATIONSTATEMENT,
   FHIR_RAW_PATIENT,
+  FHIR_RAW_PROCEDURE,
+  FHIR_RAW_QUESTIONNAIRERESPONSE,
   FHIR_RAW_RELATEDPPERSON,
+  FHIR_RAW_SERVICEREQUEST,
+  FHIR_RAW_DIAGNOSTICREPORT,
   FHIR_RAW_OBSERVATION,
   ES_HIT_SIZE,
   ES_URL,
+  ES_HOSTS,
   ES_USERNAME,
   ES_PASSWORD,
-  ES_PIT_KEEP_ALIVE,
-  KAFKA_CONCURRENCY
+  KAFKA_CONCURRENCY,
+  KAFKA_REPROCESSING_TOPIC,
+  IS_LOGSTASH_DRIVER
 } from '../config/config.mjs'
 import { updateOpenhimTransaction } from '../openhim.mjs'
 import { buildReturnObject, makeQuerablePromise } from './utils.mjs'
+import { validateDateRanges } from './dateValidation.mjs'
 
 import logger from '../logger.mjs'
 import { sendDataToKafka } from './kafka.mjs'
+import { reprocessFHIRTransactions } from './mongo.mjs';
 
-const elasticSearchConfig = {
+const esHosts = ES_HOSTS.replace(/"/g, '')
+  .split(',')
+  .map((esHost) => 'http://' + esHost)
+
+var client = new Client({
+  node: esHosts,
   headers: {
     'Content-Type': 'application/json'
   },
@@ -32,14 +45,31 @@ const elasticSearchConfig = {
     username: ES_USERNAME,
     password: ES_PASSWORD
   }
-}
+})
 
 export default function reprocess(req, res) {
+  const reprocessFhirResources = validateDateRanges(req.body.reprocess_fhir_resources);
+  const transactionId = req.headers['x-openhim-transactionid'];
+
+  if (reprocessFhirResources.readFromMongo === true) {
+    reprocessFromOpenHIM(reprocessFhirResources, transactionId);
+
+    const returnObject = buildReturnObject(
+      'Processing',
+      200,
+      //TODO: create a more relevant message for the MongoDB preprocessor reading
+      { message: "Reprocessing from OpenHIM Transactions In Progress", }
+    );
+
+    res.set('Content-Type', 'application/json+openhim')
+    return res.send(returnObject)
+  }
+
   let validatedParameters
 
   try {
     validatedParameters = validateReprocessParameters(
-      req.body.reprocess_fhir_resources
+      reprocessFhirResources
     )
   } catch (error) {
     const returnObject = buildReturnObject(
@@ -51,8 +81,6 @@ export default function reprocess(req, res) {
     res.status(400)
     return res.send(returnObject)
   }
-
-  const transactionId = req.headers['x-openhim-transactionid']
 
   reprocessIndexes(validatedParameters)
     .then(() => {
@@ -90,19 +118,46 @@ export default function reprocess(req, res) {
   return res.send(returnObject)
 }
 
+function reprocessFromOpenHIM(reprocessFhirResources, transactionId) {
+
+  const { transactionRequestMethod, reprocessFromDate: from, reprocessToDate: to } = reprocessFhirResources;
+
+  reprocessFHIRTransactions(reprocessFhirResources)
+    .then(({ successfulCounter, failedCounter, failedRanges }) => {
+      updateOpenhimTransaction(
+        transactionId,
+        'Successful',
+        200,
+        { message: "Successfully Reprocessed from OpenHIM Transactions", successfulCounter, failedCounter, failedRanges, transactionRequestMethod, from, to }
+      );
+      logger.info(
+        `Successfully Reprocessed from OpenHIM Transaction | From: ${from} | To: ${to}`
+      );
+    })
+    .catch(
+      (error) => {
+        updateOpenhimTransaction(
+          transactionId,
+          'Failed',
+          503,
+          { message: "Failed reprocessing", error: error.message, from, to }
+        );
+        logger.info(
+          `Failed to reprocess from OpenHIM Transactions | From: ${from} | To: ${to}. Error - ${error.message}`
+        );
+      }
+    );
+
+}
+
 function validateReprocessParameters(inputParams) {
   if (!inputParams) {
     throw new Error(`Argument Error: No params received: ${inputParams}`)
   }
-  const outputParams = {}
-  outputParams.reprocessFromDate = validateDateTime(
-    inputParams.reprocessFromDate,
-    '1970-01-01'
-  )
-  outputParams.reprocessToDate = validateDateTime(
-    inputParams.reprocessToDate,
-    moment()
-  )
+  const outputParams = {
+    reprocessToDate: inputParams.reprocessToDate.format(),
+    reprocessFromDate: inputParams.reprocessFromDate.format(),
+  };
 
   if (
     moment(outputParams.reprocessToDate).isBefore(
@@ -133,39 +188,35 @@ function validateIndices(inputParams) {
   if (inputParams.all) {
     indices.push(
       FHIR_RAW_CAREPLAN,
-      FHIR_RAW_CONDITION,
       FHIR_RAW_ENCOUNTER,
-      FHIR_RAW_EPISODEOFCARE,
+      FHIR_RAW_MEDICATIONDISPENSE,
+      FHIR_RAW_MEDICATIONSTATEMENT,
       FHIR_RAW_PATIENT,
+      FHIR_RAW_PROCEDURE,
+      FHIR_RAW_QUESTIONNAIRERESPONSE,
       FHIR_RAW_RELATEDPPERSON,
+      FHIR_RAW_SERVICEREQUEST,
+      FHIR_RAW_DIAGNOSTICREPORT,
       FHIR_RAW_OBSERVATION,
     )
     return indices
   }
 
   if (inputParams.carePlan) indices.push(FHIR_RAW_CAREPLAN)
-  if (inputParams.condition) indices.push(FHIR_RAW_CONDITION)
   if (inputParams.encounter) indices.push(FHIR_RAW_ENCOUNTER)
-  if (inputParams.episodeOfCare) indices.push(FHIR_RAW_EPISODEOFCARE)
+  if (inputParams.medicationDispense) indices.push(FHIR_RAW_MEDICATIONDISPENSE)
+  if (inputParams.medicationStatement)
+    indices.push(FHIR_RAW_MEDICATIONSTATEMENT)
   if (inputParams.patient) indices.push(FHIR_RAW_PATIENT)
+  if (inputParams.procedure) indices.push(FHIR_RAW_PROCEDURE)
+  if (inputParams.questionnaireResponse)
+    indices.push(FHIR_RAW_QUESTIONNAIRERESPONSE)
   if (inputParams.relatedPerson) indices.push(FHIR_RAW_RELATEDPPERSON)
+  if (inputParams.serviceRequest) indices.push(FHIR_RAW_SERVICEREQUEST)
+  if (inputParams.diagnosticReport) indices.push(FHIR_RAW_DIAGNOSTICREPORT)
   if (inputParams.observation) indices.push(FHIR_RAW_OBSERVATION)
 
   return indices
-}
-
-function validateDateTime(dateTime, defaultDate) {
-  if (dateTime) {
-    if (!moment(dateTime, moment.ISO_8601).isValid()) {
-      const errMessage = `Argument Error: Invalid Date. Failed to parse a date parameter (${dateTime})`
-      logger.error(errMessage)
-      throw new Error(errMessage)
-    }
-    return moment(dateTime, moment.ISO_8601).format()
-  } else {
-    logger.warn(`Date not provided. Default ${defaultDate}`)
-    return moment(defaultDate, moment.ISO_8601).format()
-  }
 }
 
 async function reprocessIndexes(params) {
@@ -173,17 +224,16 @@ async function reprocessIndexes(params) {
   const allPromises = []
 
   const reprocessIndex = async index => {
-    const pitUrl = `${ES_URL}/${index}/_pit?keep_alive=${ES_PIT_KEEP_ALIVE}`
-    const pitData = await postToES(pitUrl)
+    const pitData = await postToESWithPIT(index)
     if (!pitData) return
 
     logger.info(`Generated ES Index PIT for ${index}`)
     const { url, data } = prepareInputOrchestration(
       params.reprocessFromDate,
       params.reprocessToDate,
-      pitData.data.id
+      pitData.body.id,
     )
-    return orchestrateDataReprocessing(url, data, index, pitData.data.id).catch((error) => {
+    return orchestrateDataReprocessing(url, data).catch((error) => {
       throw error
     })
   }
@@ -215,7 +265,7 @@ function prepareInputOrchestration(fromDate, toDate, pitId) {
     data: {
       pit: {
         id: pitId,
-        keep_alive: ES_PIT_KEEP_ALIVE
+        keep_alive: '10s'
       },
       query: {
         range: {
@@ -243,18 +293,15 @@ function prepareInputOrchestration(fromDate, toDate, pitId) {
   return config
 }
 
-async function orchestrateDataReprocessing(url, data, index, pitId) {
+async function orchestrateDataReprocessing(url, data) {
   try {
     logger.trace(
       `Retrieve ES Data from: ${url} with config: ${JSON.stringify(data)}`
     )
-    const response = await postToES(url, data)
-    if (!response) {
-      await closeEsPIT(pitId, index)
-      return
-    }
+    const response = await postToES(data)
+    if (!response) return
 
-    const responseData = response.data
+    const responseData = response.body
 
     if (responseData.hits.hits.length) {
       await sendRawData(responseData.hits.hits)
@@ -264,25 +311,24 @@ async function orchestrateDataReprocessing(url, data, index, pitId) {
       logger.debug(`Search next frame after: ${searchAfter}`)
       data.search_after = searchAfter
 
-      if (response.data.hits.hits.length < ES_HIT_SIZE) {
-        await closeEsPIT(pitId, index)
-        return
-      }
-      await orchestrateDataReprocessing(url, data, index, pitId)
+      await orchestrateDataReprocessing(url, data)
     }
   } catch (error) {
     throw error
   }
 }
 
-function postToES(url, data) {
-  return axios
-    .post(url, data, elasticSearchConfig)
+function postToES(data) {
+  return client
+    .search({
+      body: data
+    })
     .then((response) => response)
     .catch((error) => {
-      if (error.message.includes('status code 404')) {
-        const errMsg = error.response && error.response.data && error.response.data.error && error.response.data.error.reason ? error.response.data.error.reason : error.message
-        logger.error(`ES Index not found. ${errMsg}`)
+      if (error.message.includes('status code 404') ||
+        error.message.includes('index_not_found_exception')
+      ) {
+        logger.error(`ES Index not found. ${error.message}`)
       } else if (
         error.message.includes('connect ECONNREFUSED') ||
         error.message.includes('getaddrinfo EAI_AGAIN')
@@ -296,26 +342,29 @@ function postToES(url, data) {
     })
 }
 
-function closeEsPIT(pitId, index) {
-  return axios({
-    url: `${ES_URL}/_pit`,
-    method: 'delete',
-    data: {
-      id: pitId
-    },
-    headers: elasticSearchConfig.headers,
-    auth: elasticSearchConfig.auth
-  })
-  .then(response => {
-    if (response && response.data && response.data.succeeded) {
-      logger.info(`Elastic search PIT destroyed for index ${index}`)
-    } else {
-      logger.error(`Elastic search PIT not destroyed for index ${index}`)
-    }
-  })
-  .catch(error => {
-    logger.error(`Elastic search PIT not destroyed for index ${index}. Reason - ${error.message}`)
-  })
+function postToESWithPIT(index) {
+  return client
+    .openPointInTime({
+      index,
+      keep_alive: '10s'
+    })
+    .then((response) => response)
+    .catch((error) => {
+      if (error.message.includes('status code 404') ||
+        error.message.includes('index_not_found_exception')
+      ) {
+        logger.error(`ES Index not found. ${error.message}`)
+      } else if (
+        error.message.includes('connect ECONNREFUSED') ||
+        error.message.includes('getaddrinfo EAI_AGAIN')
+      ) {
+        const errMessage = `ES not accessible: ${error.message}`
+        logger.error(errMessage)
+        throw new Error(errMessage)
+      } else {
+        throw error
+      }
+    })
 }
 
 function sendRawData(data) {
@@ -328,21 +377,26 @@ function sendRawData(data) {
 
   const simplifiedESData = data.map((hit) => hit._source)
 
+  const message = IS_LOGSTASH_DRIVER
+    ? simplifiedESData
+    : {
+      resourceType: "Bundle",
+      id: "bundle-transaction",
+      type: "transaction",
+      entry: simplifiedESData,
+      reprocess: true
+    };
+
   const promise = new Promise((resolve, reject) => {
-    sendDataToKafka(
-      simplifiedESData,
-      reject,
-      resolve
-    )
-  })
+    sendDataToKafka(message, reject, resolve, KAFKA_REPROCESSING_TOPIC)
+  });
 
   return promise.catch((error) => {
     const errMessage = `Request Error: ${error.message
       }. Failed to send ${data[0]._index.replace(
         'fhir-raw-',
         ''
-      )} resources to Kafka. Replay resources from @timestamp: ${data[0].sort[0]
-      }`
+      )} resources to Kafka. Replay resources from @timestamp: ${data[0].sort[0]}`
     logger.error(errMessage)
     throw new Error(errMessage)
   })
