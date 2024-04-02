@@ -6,7 +6,7 @@ import {buildReturnObject} from './utils.mjs'
 
 import logger from '../logger.mjs'
 import reprocessRoute from './reprocessRoute.mjs'
-import { getHandler, postHandler } from "./mongodb-route.mjs";
+import { getHandler, postHandler } from "./mongodbRoute.mjs";
 
 const routes = express.Router()
 
