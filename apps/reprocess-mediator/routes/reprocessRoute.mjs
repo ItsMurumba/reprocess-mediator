@@ -30,7 +30,6 @@ import { validateDateRanges } from './dateValidation.mjs'
 
 import logger from '../logger.mjs'
 import { sendDataToKafka } from './kafka.mjs'
-import { reprocessFHIRTransactions } from './mongo.mjs';
 
 const esHosts = ES_HOSTS.replace(/"/g, '')
   .split(',')
@@ -50,20 +49,6 @@ var client = new Client({
 export default function reprocess(req, res) {
   const reprocessFhirResources = validateDateRanges(req.body.reprocess_fhir_resources);
   const transactionId = req.headers['x-openhim-transactionid'];
-
-  if (reprocessFhirResources.readFromMongo === true) {
-    reprocessFromOpenHIM(reprocessFhirResources, transactionId);
-
-    const returnObject = buildReturnObject(
-      'Processing',
-      200,
-      //TODO: create a more relevant message for the MongoDB preprocessor reading
-      { message: "Reprocessing from OpenHIM Transactions In Progress", }
-    );
-
-    res.set('Content-Type', 'application/json+openhim')
-    return res.send(returnObject)
-  }
 
   let validatedParameters
 
@@ -116,38 +101,6 @@ export default function reprocess(req, res) {
   )
   res.set('Content-Type', 'application/json+openhim')
   return res.send(returnObject)
-}
-
-function reprocessFromOpenHIM(reprocessFhirResources, transactionId) {
-
-  const { transactionRequestMethod, reprocessFromDate: from, reprocessToDate: to } = reprocessFhirResources;
-
-  reprocessFHIRTransactions(reprocessFhirResources)
-    .then(({ successfulCounter, failedCounter, failedRanges }) => {
-      updateOpenhimTransaction(
-        transactionId,
-        'Successful',
-        200,
-        { message: "Successfully Reprocessed from OpenHIM Transactions", successfulCounter, failedCounter, failedRanges, transactionRequestMethod, from, to }
-      );
-      logger.info(
-        `Successfully Reprocessed from OpenHIM Transaction | From: ${from} | To: ${to}`
-      );
-    })
-    .catch(
-      (error) => {
-        updateOpenhimTransaction(
-          transactionId,
-          'Failed',
-          503,
-          { message: "Failed reprocessing", error: error.message, from, to }
-        );
-        logger.info(
-          `Failed to reprocess from OpenHIM Transactions | From: ${from} | To: ${to}. Error - ${error.message}`
-        );
-      }
-    );
-
 }
 
 function validateReprocessParameters(inputParams) {
