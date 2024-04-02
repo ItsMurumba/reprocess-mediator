@@ -1,0 +1,2 @@
+# Reprocess Mediator
+An OpenHIM mediator that reprocesses data (either from OpenHIM's Mongodb Transaction Logs or Elastic Search) through the pipeline again to ensure any changes to the pipeline take effect
