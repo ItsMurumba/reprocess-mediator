@@ -10,12 +10,12 @@ function SummaryScreen({ data, onBack, onReprocess, onCancel }) {
             <Typography variant="h4">Re-Processor Summary</Typography>
             <Typography>Selected Data Range</Typography>
             <Typography>
-              {data.fromDate} - {data.toDate}
+              {data.reprocessFromDate} - {data.reprocessToDate}
             </Typography>
             <Typography>Number of Transactions</Typography>
-            <Typography>{data.selectedResources.length}</Typography>
+            <Typography>{data.resources.length}</Typography>
             <Typography>Resources to be Reprocessed</Typography>
-            <Typography>{data.selectedResources.join(', ')}</Typography>
+            <Typography>{data.resources.join(', ')}</Typography>
             <Grid container justifyContent="flex-end" spacing={1}>
               <Grid item>
                 <Button variant="contained" onClick={onBack}>

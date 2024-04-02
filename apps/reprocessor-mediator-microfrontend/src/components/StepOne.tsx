@@ -1,7 +1,7 @@
 import { useState } from "react"
 import {Grid, Typography, Button, TextField, MenuItem, Card, CardContent, Select, Checkbox, ListItemText, FormControl, InputLabel} from '@mui/material'
 
-const resources = [
+const availableResources = [
    { label: 'Care Plan', value: 'CarePlan'},
    { label: 'Condition', value: 'Condition'},
    { label: 'Encounter', value: 'Encounter'},
@@ -12,24 +12,24 @@ const resources = [
 ]
 
 function ReProcessorMain({onNext, onCancel}){
-    const [requestMethod, setRequestMethod] = useState('')
-    const [selectedResources, setSelectedResources] = useState([])
-    const [fromDate, setFromDate] = useState('')
-    const [toDate, setToDate] = useState('')
+    const [method, setMethod] = useState('')
+    const [resources, setResources] = useState([])
+    const [reprocessFromDate, setReprocessFromDate] = useState('')
+    const [reprocessToDate, setReprocessToDate] = useState('')
 
     const handleNext = () => {
-        onNext({requestMethod, selectedResources, fromDate, toDate})
+        onNext({method, resources, reprocessFromDate, reprocessToDate})
     }
 
     const handleResourceChange = (event) => {
         const {value} = event.target
 
         if (value.includes('select-all')) {
-            setSelectedResources(
-                selectedResources.length === resources.length ? [] : resources.map((resource) => resource.value)
+            setResources(
+                resources.length === availableResources.length ? [] : availableResources.map((resource) => resource.value)
                 )
         } else {
-            setSelectedResources(value)
+            setResources(value)
         }
     }
 
@@ -47,8 +47,8 @@ function ReProcessorMain({onNext, onCancel}){
                         select
                         fullWidth
                         label="Transaction Request Method"
-                        value={requestMethod}
-                        onChange={(e) => setRequestMethod(e.target.value)}
+                        value={method}
+                        onChange={(e) => setMethod(e.target.value)}
                         >
                         <MenuItem value="Post">Post</MenuItem>
                         <MenuItem value="Delete">Delete</MenuItem>
@@ -59,8 +59,8 @@ function ReProcessorMain({onNext, onCancel}){
                         fullWidth
                         label="Transaction From Date"
                         type="date"
-                        value={fromDate}
-                        onChange={(e) => setFromDate(e.target.value)}
+                        value={reprocessFromDate}
+                        onChange={(e) => setReprocessFromDate(e.target.value)}
                         InputLabelProps={{shrink: true}}
                         InputProps={{inputProps: {placeholder: ''}}}
                         />
@@ -75,7 +75,7 @@ function ReProcessorMain({onNext, onCancel}){
                             labelId="resources-select-label"
                             label="Resources to Process"
                             multiple
-                            value={selectedResources}
+                            value={resources}
                             onChange={handleResourceChange}
                             renderValue={(selected) => (
                                 Array.isArray(selected) ? selected.join(', ') : selected
@@ -88,18 +88,18 @@ function ReProcessorMain({onNext, onCancel}){
                                     key="select-all"
                                     value="select-all"
                                     onClick={() => 
-                                        setSelectedResources(
-                                            selectedResources.length === resources.length ? [] : resources.map((resource) => resource.value)
+                                        setResources(
+                                            resources.length === availableResources.length ? [] : availableResources.map((resource) => resource.value)
                                         )}
                                 >
-                                    <Checkbox checked={selectedResources.length === resources.length} />
+                                    <Checkbox checked={resources.length === availableResources.length} />
                                     <ListItemText primary="Select All" />
                                 </MenuItem>
                                 {
-                                resources.map((resource) => {
+                                availableResources.map((resource) => {
                                     return (
                                         <MenuItem key={resource.value} value={resource.value}>
-                                            <Checkbox checked={selectedResources.includes(resource.value)} />
+                                            <Checkbox checked={resources.includes(resource.value)} />
                                             <ListItemText primary={resource.label} />
                                         </MenuItem>
                                     )
@@ -112,8 +112,8 @@ function ReProcessorMain({onNext, onCancel}){
                         fullWidth
                         label="Transaction To Date"
                         type="date"
-                        value={toDate}
-                        onChange={(e) => setToDate(e.target.value)}
+                        value={reprocessToDate}
+                        onChange={(e) => setReprocessToDate(e.target.value)}
                         InputLabelProps={{shrink: true}}
                         InputProps={{inputProps: {placeholder: ''}}}
                         />
