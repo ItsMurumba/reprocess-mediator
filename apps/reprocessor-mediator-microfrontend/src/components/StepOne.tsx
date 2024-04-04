@@ -22,21 +22,23 @@ function ReProcessorMain({ onNext, onCancel }) {
         const formattedToDate = new Date(reprocessToDate).toISOString()
 
         try {
-            const API_URL = process.env.REPROCESSOR_API_BASE_URL || 'http://localhost:3000/'
-            const reprocessorSummaryEndPoint = API_URL + `reprocess/mongo?reprocessFromDate=${reprocessFromDate}&reprocessToDate=${reprocessToDate}&method=${method}&resources=${resources}`
+            const API_URL = process.env.REPROCESSOR_API_BASE_URL || 'http://localhost:3000'
+            const reprocessorSummaryEndPoint = API_URL + `/reprocess/mongo?reprocessFromDate=${formattedFromDate}&reprocessToDate=${formattedToDate}&method=${method}&resources=${resources}`
 
             const response = await fetch(reprocessorSummaryEndPoint)
+
             if (!response.ok) {
                 throw new Error('Failed to fetch data')
             }
 
             const data = await response.json()
-
             const numberOfTransactions = data.numberOfTransactions
             const numberOfFhirResources = data.numberOfFhirResources
             const resourcesToReprocess = data.resources
+            const fromDate = data.fromDate
+            const toDate = data.toDate
 
-            onNext({ method, resources: resourcesToReprocess, reprocessFromDate: formattedFromDate, reprocessToDate: formattedToDate, numberOfTransactions })
+            onNext({ method, resources: resourcesToReprocess, reprocessFromDate: fromDate, reprocessToDate: toDate, numberOfTransactions })
         } catch (error) {
             console.error('Error fetching data:', error.message)
         }
@@ -55,9 +57,9 @@ function ReProcessorMain({ onNext, onCancel }) {
     }
 
     return (
-        <Grid container justifyContent="center" alignItems="center">
-            <Grid item xs={10} md={6} lg={6}>
-                <Card>
+        <Grid container justifyContent="center" alignItems="center" style={{ height: '90vh' }}>
+            <Grid item xs={10} sm={10} md={6} lg={6} xl={6}>
+                <Card style={{ height: '95%', width: '95%' }}>
                     <CardContent>
                         <Typography variant="h4" gutterBottom>
                             Re-Processor
@@ -70,6 +72,7 @@ function ReProcessorMain({ onNext, onCancel }) {
                                     label="Transaction Request Method"
                                     value={method}
                                     onChange={(e) => setMethod(e.target.value)}
+                                    required
                                 >
                                     <MenuItem value="POST">Post</MenuItem>
                                     <MenuItem value="DELETE">Delete</MenuItem>
@@ -84,12 +87,13 @@ function ReProcessorMain({ onNext, onCancel }) {
                                     onChange={(e) => setReprocessFromDate(e.target.value)}
                                     InputLabelProps={{ shrink: true }}
                                     InputProps={{ inputProps: { placeholder: '' } }}
+                                    required
                                 />
                             </Grid>
                             <Grid item xs={6}>
                                 <FormControl fullWidth>
                                     <InputLabel id="resources-select-label">
-                                        Resources to Process
+                                        Resources to Process*
                                     </InputLabel>
                                     <Select
                                         fullWidth
@@ -104,6 +108,7 @@ function ReProcessorMain({ onNext, onCancel }) {
                                         inputProps={{
                                             id: 'resources-select-label'
                                         }}
+                                        required
                                     >
                                         <MenuItem
                                             key="select-all"
@@ -137,6 +142,7 @@ function ReProcessorMain({ onNext, onCancel }) {
                                     onChange={(e) => setReprocessToDate(e.target.value)}
                                     InputLabelProps={{ shrink: true }}
                                     InputProps={{ inputProps: { placeholder: '' } }}
+                                    required
                                 />
                             </Grid>
                         </Grid>

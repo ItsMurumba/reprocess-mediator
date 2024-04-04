@@ -2,6 +2,7 @@
     "private": true,
     "workspaces": {
         "packages": [
+            "apps/reprocess-mediator",
             "apps/reprocessor-mediator-microfrontend"
         ],
         "nohoist": [
@@ -15,5 +16,8 @@
     "scripts": {
         "start": "yarn workspaces run start",
         "build": "yarn workspaces run build"
+    },
+    "devDependencies": {
+        "yarn": "^1.0.0"
     }
 }
