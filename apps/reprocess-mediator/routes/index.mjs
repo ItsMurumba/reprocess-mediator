@@ -7,8 +7,10 @@ import {buildReturnObject} from './utils.mjs'
 import logger from '../logger.mjs'
 import reprocessRoute from './reprocessRoute.mjs'
 import { getHandler, postHandler } from "./mongodbRoute.mjs";
+import cors from 'cors';
 
 const routes = express.Router()
+routes.use(cors());
 
 routes.get('/reprocess/mongo', getHandler);
 routes.post('/reprocess/mongo', postHandler);
