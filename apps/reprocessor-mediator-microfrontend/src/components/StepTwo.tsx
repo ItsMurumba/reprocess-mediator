@@ -2,10 +2,11 @@ import React, { useState } from 'react'
 import { Grid, Typography, Button, Card, CardContent, CircularProgress, IconButton } from '@mui/material'
 import { CheckCircle, ErrorRounded } from '@mui/icons-material'
 
-function SummaryScreen({ data, onBack, onReprocess, onCancel }) {
+function SummaryScreen({ data, onBack, onCancel }) {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState(false)
+
 
   const handleReprocess = async () => {
     setLoading(true)
@@ -18,7 +19,6 @@ function SummaryScreen({ data, onBack, onReprocess, onCancel }) {
         method: data.method,
         ...(data.method === 'POST' ? { resources: resourcesArray } : {})
       }
-      console.log(payload)
 
       const API_URL = process.env.REPROCESSOR_API_BASE_URL || 'http://localhost:3000'
       const response = await fetch(API_URL + '/reprocess/mongo', {
@@ -32,7 +32,7 @@ function SummaryScreen({ data, onBack, onReprocess, onCancel }) {
       if (!response.ok) {
         throw new Error("Failed to perform the Reprocess Request")
       }
-      console.log("Reprocess was successfull")
+      console.log("Reprocess was successful")
       setSuccess(true)
     } catch (error) {
       console.error("Error encountered on reprocess POST Request:", error.message)
@@ -67,7 +67,7 @@ function SummaryScreen({ data, onBack, onReprocess, onCancel }) {
                   variant="contained"
                   onClick={handleReprocess}
                   color={success ? "success" : error ? "error" : "primary"}
-                  disabled={success}
+                  disabled={success || data.numberOfTransactions === 0}
                   endIcon={
                     loading ? (
                       <CircularProgress size={24} color="inherit" />

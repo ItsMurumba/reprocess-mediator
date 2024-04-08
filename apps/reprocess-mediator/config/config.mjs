@@ -13,7 +13,7 @@ export const OPENHIM_TRANSACTION_URL =
   process.env.OPENHIM_TRANSACTION_URL || 'http://localhost:5001'
 export const OPENHIM_USERNAME =
   process.env.OPENHIM_USERNAME || 'root@openhim.org'
-export const OPENHIM_PASSWORD = process.env.OPENHIM_PASSWORD || 'instant101'
+export const OPENHIM_PASSWORD = process.env.OPENHIM_PASSWORD || 'wPu8V38ibZy*0&m0'
 export const OPENHIM_CLIENT_CUSTOM_TOKEN =
   process.env.OPENHIM_CLIENT_CUSTOM_TOKEN || 'test'
 
@@ -52,5 +52,5 @@ export const KAFKA_URL = process.env.KAFKA_URL || 'kafka-01:9092'
 
 // MongoDB
 
-export const MONGODB_CONNECTION_STRING = process.env.MONGODB_CONNECTION_STRING || 'mongodb://mongo-1:27017/openhim';
+export const MONGODB_CONNECTION_STRING = process.env.MONGODB_CONNECTION_STRING || 'mongodb://localhost/openhim';
 export const MONGODB_DIRECT_CONNECTION = process.env.MONGODB_DIRECT_CONNECTION || false;

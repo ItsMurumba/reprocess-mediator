@@ -27,7 +27,7 @@ function App() {
     return (
         <div>
             {step === 1 && <ReProcessorMain onNext={handleNext} onCancel={handleCancel} />}
-            {step === 2 && <SummaryScreen data={formData} onBack={handleBack} onReprocess={handleReprocess} onCancel={handleCancel} />}
+            {step === 2 && <SummaryScreen data={formData} onBack={handleBack} onCancel={handleCancel} />}
         </div>
     );
 }

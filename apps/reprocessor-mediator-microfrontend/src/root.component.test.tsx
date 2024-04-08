@@ -1,9 +1,11 @@
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import Root from "./root.component";
+import React from "react";
 
-describe("Root component", () => {
-  it("should be in the document", () => {
-    const { getByText } = render(<Root name="Testapp" />);
-    expect(getByText(/Testapp is mounted!/i)).toBeInTheDocument();
+test('App is mounted inside Root component', async () => {
+  const { getByTestId } = render(<Root />);
+  await waitFor(() => {
+    const appComponent = getByTestId('app-component');
+    expect(appComponent).toBeInTheDocument();
   });
 });

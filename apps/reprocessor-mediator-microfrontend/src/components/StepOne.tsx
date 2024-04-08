@@ -56,6 +56,8 @@ function ReProcessorMain({ onNext, onCancel }) {
         }
     }
 
+    const isNextDisabled = !method || !resources.length || !reprocessFromDate || !reprocessToDate
+
     return (
         <Grid container justifyContent="center" alignItems="center" style={{ height: '90vh' }}>
             <Grid item xs={10} sm={10} md={6} lg={6} xl={6}>
@@ -153,7 +155,7 @@ function ReProcessorMain({ onNext, onCancel }) {
                                 </Button>
                             </Grid>
                             <Grid item>
-                                <Button variant="contained" color="primary" onClick={handleNext}>
+                                <Button variant="contained" color="primary" onClick={handleNext} disabled={isNextDisabled}>
                                     Next
                                 </Button>
                             </Grid>
