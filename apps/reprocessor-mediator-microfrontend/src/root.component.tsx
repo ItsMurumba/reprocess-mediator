@@ -7,5 +7,5 @@ export default function Root(props) {
         <App />
       </div>
     </>
-  )
+  );
 }
