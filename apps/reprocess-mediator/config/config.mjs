@@ -13,7 +13,7 @@ export const OPENHIM_TRANSACTION_URL =
   process.env.OPENHIM_TRANSACTION_URL || 'http://localhost:5001'
 export const OPENHIM_USERNAME =
   process.env.OPENHIM_USERNAME || 'root@openhim.org'
-export const OPENHIM_PASSWORD = process.env.OPENHIM_PASSWORD || 'wPu8V38ibZy*0&m0'
+export const OPENHIM_PASSWORD = process.env.OPENHIM_PASSWORD || 'instant101'
 export const OPENHIM_CLIENT_CUSTOM_TOKEN =
   process.env.OPENHIM_CLIENT_CUSTOM_TOKEN || 'test'
 
