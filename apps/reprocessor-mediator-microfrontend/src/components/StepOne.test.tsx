@@ -59,6 +59,6 @@ describe("ReProcessorMain Component", () => {
     fireEvent.click(selectAllOption);
 
     const resources = screen.getAllByRole("option", { selected: true });
-    expect(resources.length).toBe(7);
+    expect(resources.length).toBe(13);
   });
 });

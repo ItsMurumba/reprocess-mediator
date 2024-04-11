@@ -87,7 +87,15 @@ function SummaryScreen({ data, onBack, onCancel }) {
               Resources to be Reprocessed:
             </Typography>
             <Typography style={{ marginBottom: "16px" }}>
-              {data.resources}
+              {data.resources.split(",").map((resource, index) => (
+                <Button
+                  key={index}
+                  variant="outlined"
+                  style={{ marginRight: "8px", marginBottom: "8px" }}
+                >
+                  {resource.trim()}
+                </Button>
+              ))}
             </Typography>
             <Grid container justifyContent="flex-end" spacing={1}>
               <Grid item>

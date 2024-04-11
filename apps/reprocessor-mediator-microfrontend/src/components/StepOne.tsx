@@ -17,11 +17,17 @@ import {
 const availableResources = [
   { label: "Care Plan", value: "CarePlan" },
   { label: "Condition", value: "Condition" },
+  { label: "Diagnostic Report", value: "DiagnosticReport" },
   { label: "Encounter", value: "Encounter" },
   { label: "Episode Of Care", value: "EpisodeOfCare" },
-  { label: "Patient", value: "Patient" },
-  { label: "Related Person", value: "RelatedPerson" },
+  { label: "Medication Dispense", value: "MedicationDispense" },
+  { label: "Medication Statement", value: "MedicationStatement" },
   { label: "Observation", value: "Observation" },
+  { label: "Patient", value: "Patient" },
+  { label: "Procedure", value: "Procedure" },
+  { label: "Questionnaire Response", value: "QuestionnaireResponse" },
+  { label: "Related Person", value: "RelatedPerson" },
+  { label: "Service Request", value: "ServiceRequest" },
 ];
 
 function ReProcessorMain({ onNext, onCancel }) {

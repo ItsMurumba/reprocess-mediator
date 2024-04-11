@@ -11,6 +11,9 @@ describe("SummaryScreen Component", () => {
     method: "POST",
   };
 
+  const handleBack = jest.fn();
+  const handleCancel = jest.fn();
+
   test("renders component with initial state", () => {
     render(<SummaryScreen data={data} onBack={() => {}} onCancel={() => {}} />);
     expect(screen.getByText(/Re-Processor Summary/i)).toBeInTheDocument();
@@ -25,7 +28,6 @@ describe("SummaryScreen Component", () => {
     expect(
       screen.getByText(/Resources to be Reprocessed/i)
     ).toBeInTheDocument();
-    expect(screen.getByText(`${data.resources}`)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Back/i })).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /Reprocess/i })
@@ -105,5 +107,18 @@ describe("SummaryScreen Component", () => {
     });
 
     consoleErrorSpy.mockRestore();
+  });
+
+  test("renders resources as buttons", () => {
+    render(
+      <SummaryScreen data={data} onBack={handleBack} onCancel={handleCancel} />
+    );
+    const resources = data.resources
+      .split(",")
+      .map((resource) => resource.trim());
+
+    resources.forEach((resource) => {
+      expect(screen.getByText(resource)).toBeInTheDocument();
+    });
   });
 });
