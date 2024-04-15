@@ -125,7 +125,6 @@ export async function pushMessagesToKafka(payloads){
       logger.error(`Failed to push to Kafka. Error Message: ${error.message}`);
       failedCounter++;
     }
-    
   }
 
   return failedCounter;
