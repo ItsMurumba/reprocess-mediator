@@ -1,6 +1,6 @@
 {
   "urn": "urn:mediator:reprocess-mediator",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "name": "Reprocess Mediator",
   "description": "Reprocess Mediator",
   "defaultChannelConfig": [
@@ -102,7 +102,7 @@
           "type": "bool"
         },
         {
-          "param": "espisodeOfCare",
+          "param": "episodeOfCare",
           "displayName": "Reprocess EpisodeOfCare Resources",
           "description": "Reprocess the Elastic Search Raw EpisodeOfCare Index",
           "type": "bool"

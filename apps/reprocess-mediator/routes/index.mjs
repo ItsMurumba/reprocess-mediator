@@ -16,7 +16,6 @@ routes.get('/reprocess/mongo', getHandler);
 routes.post('/reprocess/mongo', postHandler);
 routes.post('/reprocess', reprocessRoute)
 
-
 // Any request regardless of request type or url path to the mediator port will be caught here
 // and trigger the canned response. It may be useful in diagnosing incorrectly configured
 // channels from the OpenHIM Console.

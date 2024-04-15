@@ -3,7 +3,6 @@ import { sendDataToKafka } from './kafka.mjs';
 import { KAFKA_2XX_TOPIC, MONGODB_CONNECTION_STRING, MONGODB_DIRECT_CONNECTION } from '../config/config.mjs';
 import logger from '../logger.mjs';
 
-
 async function connectToMongoDB(attempt = 1, errorMessage = "") {
   if (attempt > 3) {
     throw new Error(errorMessage);
@@ -24,7 +23,7 @@ async function connectToMongoDB(attempt = 1, errorMessage = "") {
   }
 }
 
-export async function queryOpenhimTransactions({toDate, fromDate, method, resources}){
+export async function queryOpenhimTransactions({ toDate, fromDate, method, resources }) {
   await connectToMongoDB();
 
   const query = await mongoose.connection.db.collection('transactions')
@@ -42,16 +41,16 @@ export async function queryOpenhimTransactions({toDate, fromDate, method, resour
       "_id": 0,
       "request": 1
     })
-    .sort( { 'request.timestamp': 1 })
+    .sort({ 'request.timestamp': 1 })
     .addCursorFlag('exhaust', true)
     .toArray();
 
   let payload
-  if(method === 'POST'){
-     logger.info("Processing POST requests");
-     payload = await formatPostRequests(query, resources);
+  if (method === 'POST') {
+    logger.info("Processing POST requests");
+    payload = await formatPostRequests(query, resources);
 
-  }else {
+  } else {
     logger.info("Processing DELETE requests");
     payload = await formateDeleteRequests(query);
   }
@@ -61,7 +60,7 @@ export async function queryOpenhimTransactions({toDate, fromDate, method, resour
   await mongoose.disconnect();
 
   return payload;
-  
+
 }
 
 export function formatPostRequests(query, resources) {

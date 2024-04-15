@@ -5,14 +5,12 @@ export async function getHandler(req, res) {
 
   const validatedQuery = validateReprocessingOptions(query);
 
-  if(validatedQuery.error){
-    return res.status(400).json({error: validatedQuery.error})
-
+  if (validatedQuery.error) {
+    return res.status(400).json({ error: validatedQuery.error })
   }
 
   // Get the results from MongoDB
   const { numberOfFhirResources, numberOfTransactions } = await queryOpenhimTransactions(validatedQuery);
-
 
   return res.json({
     ...validatedQuery,
@@ -25,53 +23,53 @@ export async function postHandler(req, res) {
   const { body } = req;
 
   const validatedBody = validateReprocessingOptions(body);
-  if(validatedBody.error){
-    return res.status(400).json({error: validatedBody.error})
+  if (validatedBody.error) {
+    return res.status(400).json({ error: validatedBody.error })
   }
 
-  if(validatedBody.method === 'POST'){
+  if (validatedBody.method === 'POST') {
     const {
       numberOfTransactions,
       requestBodies
-     } = await queryOpenhimTransactions(validatedBody);
+    } = await queryOpenhimTransactions(validatedBody);
 
-     const failedCounter = await pushMessagesToKafka(requestBodies);
+    const failedCounter = await pushMessagesToKafka(requestBodies);
 
-     return res.json({
+    return res.json({
       message: `Successfully Reprocessed ${numberOfTransactions - failedCounter} of ${numberOfTransactions} Transactions`,
-     });
+    });
   }
-  else if(validatedBody.method === 'DELETE'){
-    const { 
+  else if (validatedBody.method === 'DELETE') {
+    const {
       numberOfTransactions,
       requests
-     } = await queryOpenhimTransactions(validatedBody);
+    } = await queryOpenhimTransactions(validatedBody);
 
-      const failedCounter = await pushMessagesToKafka(requests);
+    const failedCounter = await pushMessagesToKafka(requests);
 
-     return res.json({
+    return res.json({
       message: `Successfully Reprocessed ${numberOfTransactions - failedCounter} of ${numberOfTransactions} Transactions`,
-     });
+    });
   }
   else {
-    return res.status(400).json({error: "Invalid method"});
+    return res.status(400).json({ error: "Invalid method" });
   }
 }
 
 
 function validateReprocessingOptions(reprocessingOptions) {
-    if (!reprocessingOptions.reprocessFromDate || !reprocessingOptions.reprocessToDate) {
-      return {
-        error: "reprocessFromDate and reprocessToDate are required",
-      };
-    }
-  
-    const resources = reprocessingOptions?.resources;
-  
+  if (!reprocessingOptions.reprocessFromDate || !reprocessingOptions.reprocessToDate) {
     return {
-      fromDate: reprocessingOptions.reprocessFromDate,
-      toDate: reprocessingOptions.reprocessToDate,
-      method: reprocessingOptions.method || null,
-      resources,
+      error: "reprocessFromDate and reprocessToDate are required",
     };
   }
+
+  const resources = reprocessingOptions?.resources;
+
+  return {
+    fromDate: reprocessingOptions.reprocessFromDate,
+    toDate: reprocessingOptions.reprocessToDate,
+    method: reprocessingOptions.method || null,
+    resources,
+  };
+}
