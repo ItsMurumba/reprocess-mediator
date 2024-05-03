@@ -1,8 +1,7 @@
 'use strict'
 
+import { LOG_LEVEL} from './config/config.mjs';
 import pino, {stdSerializers} from 'pino'
-
-import {LOG_LEVEL} from './config/config.mjs'
 
 export default pino({
   timestamp: pino.stdTimeFunctions.isoTime,

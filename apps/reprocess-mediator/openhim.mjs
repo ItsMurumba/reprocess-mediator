@@ -4,6 +4,8 @@ import fs from 'fs'
 import path from 'path'
 import axios from 'axios'
 import moment from 'moment'
+import https from 'https'
+
 // The OpenHIM Mediator Utils is an essential package for quick mediator setup.
 // It handles the OpenHIM authentication, mediator registration, and mediator heartbeat.
 import {
@@ -142,6 +144,7 @@ export const updateOpenhimTransaction = (transactionId, status, statusCode, body
       Authorization: `Basic ${authHeader}`,
       'Content-Type': 'application/json'
     },
+    httpsAgent: new https.Agent({rejectUnauthorized: false}),
     data: update
   })
   .then(() => {
