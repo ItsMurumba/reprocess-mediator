@@ -9,6 +9,7 @@ import {
   IconButton,
 } from "@mui/material";
 import { CheckCircle, ErrorRounded } from "@mui/icons-material";
+import { enqueueSnackbar } from "notistack";
 
 function SummaryScreen({ data, onBack, onCancel }) {
   const [loading, setLoading] = useState(false);
@@ -44,11 +45,19 @@ function SummaryScreen({ data, onBack, onCancel }) {
       }
       console.log("Reprocess was successful");
       setSuccess(true);
+      enqueueSnackbar("Reprocess was successful", {
+        variant: "success",
+        autoHideDuration: 10000,
+      });
     } catch (error) {
       console.error(
         "Error encountered on reprocess POST Request:",
         error.message
       );
+      enqueueSnackbar("Error encountered on reprocess POST Request", {
+        variant: "error",
+        autoHideDuration: 10000,
+      });
       setError(true);
     } finally {
       setLoading(false);

@@ -1,3 +1,4 @@
+import { SnackbarProvider } from "notistack";
 import App from "./components/App/App";
 
 export default function Root(props) {
@@ -5,6 +6,7 @@ export default function Root(props) {
     <>
       <div data-testid="app-component">
         <App />
+        <SnackbarProvider />
       </div>
     </>
   );

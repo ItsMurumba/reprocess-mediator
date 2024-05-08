@@ -13,6 +13,7 @@ import {
   FormControl,
   InputLabel,
 } from "@mui/material";
+import { enqueueSnackbar } from "notistack";
 
 const availableResources = [
   { label: "Care Plan", value: "CarePlan" },
@@ -35,8 +36,10 @@ function ReProcessorMain({ onNext, onCancel }) {
   const [resources, setResources] = useState([]);
   const [reprocessFromDate, setReprocessFromDate] = useState("");
   const [reprocessToDate, setReprocessToDate] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleNext = async () => {
+    setIsLoading(true);
     const formattedFromDate = new Date(reprocessFromDate).toISOString();
     const formattedToDate = new Date(reprocessToDate).toISOString();
 
@@ -69,6 +72,10 @@ function ReProcessorMain({ onNext, onCancel }) {
       });
     } catch (error) {
       console.error("Error fetching data:", error.message);
+      enqueueSnackbar("Error fetching data", {
+        variant: "error",
+        autoHideDuration: 10000,
+      });
     }
   };
 
@@ -209,7 +216,7 @@ function ReProcessorMain({ onNext, onCancel }) {
                   onClick={handleNext}
                   disabled={isNextDisabled}
                 >
-                  Next
+                  {isLoading ? "Loading..." : "Next"}
                 </Button>
               </Grid>
             </Grid>
