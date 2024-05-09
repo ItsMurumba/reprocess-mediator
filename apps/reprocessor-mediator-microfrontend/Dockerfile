@@ -1,8 +1,10 @@
 FROM node:18 AS build
 
-WORKDIR /usr/app/apps/reprocessor-mediator-microfrontend
+WORKDIR /usr/app
+
 RUN ls -l
-COPY . .
+
+COPY apps/reprocessor-mediator-microfrontend/ .
 
 RUN ls -l
 # Install app dependencies
