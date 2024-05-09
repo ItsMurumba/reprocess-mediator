@@ -2,13 +2,8 @@ FROM node:18 AS build
 
 WORKDIR /usr/app
 
-RUN ls -l
-
 COPY apps/reprocessor-mediator-microfrontend/ .
 
-RUN ls -l
-
-# Install app dependencies
 RUN yarn install --immutable --immutable-cache --check-cache
 
 RUN yarn run build

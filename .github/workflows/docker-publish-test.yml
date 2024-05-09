@@ -20,13 +20,13 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # - name: Build and push tag
-      #   if: ${{ github.ref_name != 'main' }}
-      #   uses: docker/build-push-action@v2
-      #   with:
-      #     push: true
-      #     file: apps/reprocess-mediator/Dockerfile
-      #     tags: kevmurumba/reprocess-mediator:${{ github.ref_name }}
+      - name: Build and push tag
+        if: ${{ github.ref_name != 'main' }}
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          file: apps/reprocess-mediator/Dockerfile
+          tags: kevmurumba/reprocess-mediator:${{ github.ref_name }}
 
       - name: Build and push ui tag
         if: ${{ github.ref_name != 'main' }}
@@ -36,13 +36,13 @@ jobs:
           file: apps/reprocessor-mediator-microfrontend/Dockerfile
           tags: kevmurumba/reprocess-mediator-ui:${{ github.ref_name }}
 
-      # - name: Build and push latest
-      #   if: ${{ github.ref_name == 'main' }}
-      #   uses: docker/build-push-action@v2
-      #   with:
-      #     push: true
-      #     file: apps/reprocess-mediator/Dockerfile
-      #     tags: kevmurumba/reprocess-mediator:latest
+      - name: Build and push latest
+        if: ${{ github.ref_name == 'main' }}
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          file: apps/reprocess-mediator/Dockerfile
+          tags: kevmurumba/reprocess-mediator:latest
 
       - name: Build and push ui latest
         if: ${{ github.ref_name == 'main' }}
