@@ -5,7 +5,7 @@ WORKDIR /usr/app/apps/reprocessor-mediator-microfrontend
 COPY . .
 
 # Install app dependencies
-COPY package.json ./
+COPY app/apps/reprocessor-mediator-microfrontend/package.json .
 
 RUN yarn install --immutable --immutable-cache --check-cache
 
