@@ -4,7 +4,12 @@ WORKDIR /usr/app
 
 COPY . .
 
-RUN yarn install
+# Install app dependencies
+COPY package.json ./
+
+RUN yarn install --immutable --immutable-cache --check-cache
+
+# RUN yarn install
 
 RUN yarn run build
 
