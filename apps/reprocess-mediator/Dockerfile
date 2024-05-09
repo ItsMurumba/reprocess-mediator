@@ -3,7 +3,7 @@ FROM node:18-alpine
 ENV NODE_ENV production
 
 # Create app directory
-WORKDIR /usr/src/app
+WORKDIR /usr/src/app/apps/reprocessor-mediator
 
 # Install app dependencies
 COPY package.json ./
