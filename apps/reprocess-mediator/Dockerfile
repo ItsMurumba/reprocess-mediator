@@ -15,6 +15,8 @@ RUN yarn install --immutable --immutable-cache --check-cache
 
 RUN ls -l
 
+RUN pwd
+
 # Bundle app source
 # COPY . .
 
