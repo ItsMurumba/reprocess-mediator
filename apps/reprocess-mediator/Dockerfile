@@ -5,7 +5,7 @@ ENV NODE_ENV production
 # Create app directory
 WORKDIR /usr/src/app
 
-COPY apps/reprocessor-mediator/. .
+COPY apps/reprocess-mediator/. .
 
 # Install app dependencies
 COPY package.json ./
