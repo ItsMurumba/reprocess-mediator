@@ -5,7 +5,7 @@ ENV NODE_ENV production
 # Create app directory
 WORKDIR /usr/src/app
 
-COPY apps/reprocessor-mediator-microfrontend/ .
+COPY apps/reprocessor-mediator-microfrontend/. .
 
 # Install app dependencies
 COPY package.json ./
