@@ -13,6 +13,8 @@ COPY yarn.lock ./
 
 RUN yarn install --immutable --immutable-cache --check-cache
 
+RUN ls -l
+
 # Bundle app source
 # COPY . .
 
