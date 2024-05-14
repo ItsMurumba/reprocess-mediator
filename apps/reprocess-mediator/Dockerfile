@@ -5,14 +5,13 @@ ENV NODE_ENV production
 # Create app directory
 WORKDIR /usr/src/app
 
+COPY apps/reprocess-mediator/. .
+
 # Install app dependencies
 COPY package.json ./
 COPY yarn.lock ./
 
 RUN yarn install --immutable --immutable-cache --check-cache
-
-# Bundle app source
-COPY . .
 
 EXPOSE 3000
 CMD [ "node", "app.mjs" ]
