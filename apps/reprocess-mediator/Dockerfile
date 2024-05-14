@@ -1,18 +1,13 @@
-FROM node:18-alpine
+FROM node:18
 
 ENV NODE_ENV production
 
 # Create app directory
 WORKDIR /usr/src/app
 
-# Install app dependencies
-COPY package.json ./
-COPY yarn.lock ./
+COPY apps/reprocess-mediator/ .
 
 RUN yarn install --immutable --immutable-cache --check-cache
-
-# Bundle app source
-COPY . .
 
 EXPOSE 3000
 CMD [ "node", "app.mjs" ]
