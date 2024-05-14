@@ -7,10 +7,6 @@ WORKDIR /usr/src/app
 
 COPY apps/reprocess-mediator/ .
 
-# Install app dependencies
-# COPY package.json ./
-# COPY yarn.lock ./
-
 RUN yarn install --immutable --immutable-cache --check-cache
 
 EXPOSE 3000
