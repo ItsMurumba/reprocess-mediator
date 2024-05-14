@@ -6,10 +6,11 @@ ENV NODE_ENV production
 WORKDIR /usr/src/app
 
 COPY apps/reprocess-mediator/. .
+# COPY . .
 
 # Install app dependencies
-COPY package.json ./
-COPY ../../yarn.lock ./
+# COPY package.json ./
+# COPY ../../yarn.lock ./
 
 RUN yarn install --immutable --immutable-cache --check-cache
 
