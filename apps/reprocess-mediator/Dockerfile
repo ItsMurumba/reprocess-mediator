@@ -17,6 +17,8 @@ RUN ls -l
 
 RUN pwd
 
+RUN cat yarn.lock
+
 # Bundle app source
 # COPY . .
 
