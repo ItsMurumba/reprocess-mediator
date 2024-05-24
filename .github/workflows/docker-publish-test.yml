@@ -48,7 +48,7 @@ jobs:
         if: ${{ github.ref_name == 'main' }}
         uses: docker/build-push-action@v5
         with:
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/arm64
           push: true
           file: apps/reprocess-mediator/Dockerfile
           tags: kevmurumba/reprocess-mediator:latest
@@ -57,7 +57,7 @@ jobs:
         if: ${{ github.ref_name == 'main' }}
         uses: docker/build-push-action@v5
         with:
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/arm64
           push: true
           file: apps/reprocessor-mediator-microfrontend/Dockerfile
           tags: kevmurumba/reprocess-mediator-ui:latest
