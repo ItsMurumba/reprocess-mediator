@@ -12,16 +12,7 @@ COPY apps/reprocessor-mediator-microfrontend/ .
 RUN yarn config set network-timeout ${NETWORK_TIMEOUT:-600000}
 
 # Install dependencies with retries
-RUN retry() {
-      n=0
-      until [ $n -ge 5 ]
-      do
-        yarn install --check-cache && break
-        n=$[$n+1]
-        sleep 15
-      done
-    }
-    retry
+RUN bash -c 'n=0; until [ $n -ge 5 ]; do yarn install --check-cache && break; n=$((n+1)); sleep 15; done'
 
 RUN yarn run build
 
