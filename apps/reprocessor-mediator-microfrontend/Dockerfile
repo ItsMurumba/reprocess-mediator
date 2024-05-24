@@ -4,7 +4,7 @@ WORKDIR /usr/app
 
 COPY apps/reprocessor-mediator-microfrontend/ .
 
-RUN yarn install --immutable --immutable-cache --check-cache
+RUN yarn install --check-cache
 
 RUN yarn run build
 
