@@ -2,13 +2,11 @@ FROM node:18 AS build
 
 WORKDIR /usr/app
 
-COPY apps/reprocessor-mediator-microfrontend/. .
+COPY apps/reprocessor-mediator-microfrontend/ .
 
 RUN yarn install --immutable --immutable-cache --check-cache
 
 RUN yarn run build
-
-RUN ls -l
 
 FROM nginx:1.23.1-alpine
 
