@@ -1,10 +1,27 @@
 FROM node:18 AS build
 
+ARG NETWORK_TIMEOUT
+
 WORKDIR /usr/app
 
 COPY apps/reprocessor-mediator-microfrontend/ .
 
-RUN yarn install --check-cache
+# RUN yarn install --check-cache
+
+# Set Yarn network timeout
+RUN yarn config set network-timeout ${NETWORK_TIMEOUT:-600000}
+
+# Install dependencies with retries
+RUN retry() {
+      n=0
+      until [ $n -ge 5 ]
+      do
+        yarn install --check-cache && break
+        n=$[$n+1]
+        sleep 15
+      done
+    }
+    retry
 
 RUN yarn run build
 
