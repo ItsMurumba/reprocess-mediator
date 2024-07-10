@@ -13,7 +13,7 @@ RUN yarn config set network-timeout ${NETWORK_TIMEOUT:-600000}
 
 # Install dependencies with retries
 RUN bash -c 'n=0; until [ $n -ge 5 ]; do yarn install --check-cache && break; n=$((n+1)); sleep 15; done'
-
+RUN ls -al
 RUN yarn run build
 
 FROM nginx:1.23.1-alpine
