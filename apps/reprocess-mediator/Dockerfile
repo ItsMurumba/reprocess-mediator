@@ -1,6 +1,6 @@
 FROM node:18
 
-ENV NODE_ENV production
+ENV NODE_ENV local
 
 # Create app directory
 WORKDIR /usr/src/app
