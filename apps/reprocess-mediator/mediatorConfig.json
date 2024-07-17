@@ -19,6 +19,23 @@
       "allow": ["instant"],
       "methods": ["POST"],
       "type": "http"
+    },
+    {
+      "name": "Reprocess MongoDB Route",
+      "urlPattern": "^/reprocess/mongo.*$",
+      "routes": [
+        {
+          "name": "Reprocess Endpoint",
+          "host": "reprocess-mediator",
+          "port": "3000",
+          "primary": true,
+          "type": "http"
+        }
+      ],
+      "allow": [],
+      "methods": ["GET","POST"],
+      "type": "http",
+      "authType": "public"
     }
   ],
   "endpoints": [
