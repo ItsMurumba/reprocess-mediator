@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Grid,
   Typography,
@@ -10,13 +10,34 @@ import {
 } from "@mui/material";
 import { CheckCircle, ErrorRounded } from "@mui/icons-material";
 import { enqueueSnackbar } from "notistack";
+import { AxiosInstance } from "axios";
+import { initializeAPIClient } from "../config";
 
 function SummaryScreen({ data, onBack, onCancel }) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
+  const apiClientRef = useRef<AxiosInstance | null>(null);
+
+  useEffect(() => {
+    const initializeClient = async () => {
+      try {
+        const client = await initializeAPIClient();
+        apiClientRef.current = client;
+      } catch (error) {
+        console.error("Error initializing API client:", error);
+      }
+    };
+
+    initializeClient();
+  }, []);
 
   const handleReprocess = async () => {
+    if (!apiClientRef.current) {
+      console.error("API client is not initialized");
+      return;
+    }
+
     setLoading(true);
     try {
       const resourcesArray = data.resources
@@ -30,19 +51,12 @@ function SummaryScreen({ data, onBack, onCancel }) {
         ...(data.method === "POST" ? { resources: resourcesArray } : {}),
       };
 
-      const API_URL =
-        process.env.REPROCESSOR_API_BASE_URL || "http://localhost:3000";
-      const response = await fetch(API_URL + "/reprocess/mongo", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await apiClientRef.current.post("/reprocess/mongo", payload);
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error("Failed to perform the Reprocess Request");
       }
+
       console.log("Reprocess was successful");
       setSuccess(true);
       enqueueSnackbar("Reprocess was successful", {

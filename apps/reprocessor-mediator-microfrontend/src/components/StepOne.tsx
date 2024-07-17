@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Grid,
   Typography,
@@ -14,6 +14,8 @@ import {
   InputLabel,
 } from "@mui/material";
 import { enqueueSnackbar } from "notistack";
+import { initializeAPIClient } from "../config";
+import { AxiosInstance } from "axios";
 
 const availableResources = [
   { label: "Care Plan", value: "CarePlan" },
@@ -37,26 +39,44 @@ function ReProcessorMain({ onNext, onCancel }) {
   const [reprocessFromDate, setReprocessFromDate] = useState("");
   const [reprocessToDate, setReprocessToDate] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const apiClientRef = useRef<AxiosInstance | null>(null);
+
+  useEffect(() => {
+    const initializeClient = async () => {
+      try {
+        const client = await initializeAPIClient();
+        apiClientRef.current = client;
+      } catch (error) {
+        console.error("Error initializing API client:", error);
+      }
+    };
+
+    initializeClient();
+  }, []);
 
   const handleNext = async () => {
+    if (!apiClientRef.current) {
+      console.error("API client is not initialized");
+      return;
+    }
+
     setIsLoading(true);
     const formattedFromDate = new Date(reprocessFromDate).toISOString();
     const formattedToDate = new Date(reprocessToDate).toISOString();
 
     try {
-      const API_URL =
-        process.env.REPROCESSOR_API_BASE_URL || "http://localhost:3000";
-      const reprocessorSummaryEndPoint =
-        API_URL +
-        `/reprocess/mongo?reprocessFromDate=${formattedFromDate}&reprocessToDate=${formattedToDate}&method=${method}&resources=${resources}`;
+      const client = await initializeAPIClient();
+      const reprocessorSummaryEndPoint = `/reprocess/mongo?reprocessFromDate=${formattedFromDate}&reprocessToDate=${formattedToDate}&method=${method}&resources=${resources}`;
 
-      const response = await fetch(reprocessorSummaryEndPoint);
+      const response = await apiClientRef.current.get(reprocessorSummaryEndPoint, {
+        withCredentials: true,
+      });
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error("Failed to fetch data");
       }
 
-      const data = await response.json();
+      const data = response.data;
       const numberOfTransactions = data.numberOfTransactions;
       const numberOfFhirResources = data.numberOfFhirResources;
       const resourcesToReprocess = data.resources;
@@ -76,6 +96,8 @@ function ReProcessorMain({ onNext, onCancel }) {
         variant: "error",
         autoHideDuration: 10000,
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
