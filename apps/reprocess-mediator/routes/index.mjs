@@ -10,7 +10,15 @@ import { getHandler, postHandler } from "./mongodbRoute.mjs";
 import cors from 'cors';
 
 const routes = express.Router()
-routes.use(cors());
+routes.use(cors({
+  methods: "GET,PUT,POST,DELETE",
+  origin: function(origin, callback){
+    if (!origin) return callback(null, true) 
+    callback(null, origin)
+  },
+  optionsSuccessStatus: 200,
+  credentials: true
+}));
 
 routes.get('/reprocess/mongo', getHandler);
 routes.post('/reprocess/mongo', postHandler);

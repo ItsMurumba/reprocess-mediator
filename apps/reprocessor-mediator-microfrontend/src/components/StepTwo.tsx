@@ -51,9 +51,13 @@ function SummaryScreen({ data, onBack, onCancel }) {
         ...(data.method === "POST" ? { resources: resourcesArray } : {}),
       };
 
-      const response = await apiClientRef.current.post("/reprocess/mongo", payload, {
-        withCredentials: true,
-      });
+      const response = await apiClientRef.current.post(
+        "/reprocess/mongo",
+        payload,
+        {
+          withCredentials: true,
+        }
+      );
 
       if (response.status !== 200) {
         throw new Error("Failed to perform the Reprocess Request");
