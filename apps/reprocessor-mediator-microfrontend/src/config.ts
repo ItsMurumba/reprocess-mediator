@@ -38,9 +38,3 @@ export async function initializeAPIClient(){
         throw new Error("Failed to initialize API Client");
     }
 }
-
-// import dotenv from 'dotenv';
-
-// dotenv.config();
-
-// export const REPROCESSOR_API_BASE_URL = process.env.REPROCESSOR_API_BASE_URL || "http://localhost:5001";
