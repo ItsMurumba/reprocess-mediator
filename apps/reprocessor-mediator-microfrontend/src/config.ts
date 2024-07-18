@@ -13,13 +13,11 @@ interface Config {
 
 export const config = {
     isDev: process.env.NODE_ENV !== "production",
-    updateReprocess: "reprocess/mongo"
 };
 
 export async function initializeAPIClient(){
     try {
         const response = await fetch("/config/default.json");
-        console.log(response);
         const config: Config = await response.json();
         let hostPath = config.hostPath || "";
 
@@ -28,7 +26,6 @@ export async function initializeAPIClient(){
         }
 
         const baseURL = `${config.protocol}://${config.openHIMAPIhost}:${config.openHIMAPIport}${hostPath}`;
-        console.log("Base URL:", baseURL);
 
         const client = axios.create({
             withCredentials: true,

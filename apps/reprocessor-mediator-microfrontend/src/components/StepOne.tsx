@@ -66,9 +66,10 @@ function ReProcessorMain({ onNext, onCancel }) {
 
     try {
       const client = await initializeAPIClient();
+      apiClientRef.current = client;
       const reprocessorSummaryEndPoint = `/reprocess/mongo?reprocessFromDate=${formattedFromDate}&reprocessToDate=${formattedToDate}&method=${method}&resources=${resources}`;
 
-      const response = await apiClientRef.current.get(reprocessorSummaryEndPoint, {
+      const response = await client.get(reprocessorSummaryEndPoint, {
         withCredentials: true,
       });
 
